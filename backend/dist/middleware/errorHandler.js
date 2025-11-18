@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.errorHandler = void 0;
+// Simple error handler to ensure consistent JSON responses
+const errorHandler = (err, _req, res, _next) => {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).json({ message: err.message || 'Internal server error' });
+};
+exports.errorHandler = errorHandler;
