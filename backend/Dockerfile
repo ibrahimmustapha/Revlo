@@ -6,14 +6,14 @@ WORKDIR /app
 FROM base AS deps
 ENV NODE_ENV=production
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Build stage
 FROM base AS builder
 ENV NODE_ENV=development
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 COPY tsconfig.json ./
 COPY prisma ./prisma
 COPY src ./src
