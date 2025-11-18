@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { FormEvent, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Spinner } from '../components/Spinner';
 
 interface Dispute {
   id: string;
@@ -15,7 +16,7 @@ interface Dispute {
 export default function DisputesPage() {
   const { token } = useAuth();
   const qc = useQueryClient();
-  const { data: disputes } = useQuery<Dispute[]>({
+  const { data: disputes, isLoading } = useQuery<Dispute[]>({
     queryKey: ['disputes'],
     queryFn: async () => (await api.get('/disputes/me')).data,
     enabled: Boolean(token),
@@ -90,42 +91,46 @@ export default function DisputesPage() {
 
       <div className="card p-4">
         <h3 className="font-semibold mb-3">My Disputes</h3>
-        <div className="space-y-4">
-          {disputes?.map((d) => (
-            <div key={d.id} className="border border-slate-200 dark:border-slate-800 rounded-xl p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold">{d.reason}</div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">Trade {d.tradeId}</div>
-                </div>
-                <span className="badge">{d.status}</span>
-              </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400 mt-2">Evidence: {d.evidence?.length || 0}</div>
-              <div className="flex flex-col md:flex-row gap-2 mt-3">
-                <input
-                  className="input flex-1"
-                  placeholder="File URL"
-                  value={fileInputs[d.id] || ''}
-                  onChange={(e) => setFileInputs((prev) => ({ ...prev, [d.id]: e.target.value }))}
-                />
-                <button
-                  className="btn-secondary"
-                  onClick={() => addEvidence.mutate({ disputeId: d.id, url: fileInputs[d.id] || '' })}
-                  disabled={addEvidence.isPending}
-                >
-                  {addEvidence.isPending ? 'Adding...' : 'Add Evidence'}
-                </button>
-              </div>
-              <div className="text-sm mt-2 space-y-1">
-                {d.evidence?.map((ev) => (
-                  <div key={ev.id} className="text-slate-500 dark:text-slate-400">
-                    • {ev.type}: {ev.fileUrl}
+        {isLoading ? (
+          <Spinner label="Loading disputes..." />
+        ) : (
+          <div className="space-y-4">
+            {disputes?.map((d) => (
+              <div key={d.id} className="border border-slate-200 dark:border-slate-800 rounded-xl p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold">{d.reason}</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400">Trade {d.tradeId}</div>
                   </div>
-                ))}
+                  <span className="badge">{d.status}</span>
+                </div>
+                <div className="text-sm text-slate-500 dark:text-slate-400 mt-2">Evidence: {d.evidence?.length || 0}</div>
+                <div className="flex flex-col md:flex-row gap-2 mt-3">
+                  <input
+                    className="input flex-1"
+                    placeholder="File URL"
+                    value={fileInputs[d.id] || ''}
+                    onChange={(e) => setFileInputs((prev) => ({ ...prev, [d.id]: e.target.value }))}
+                  />
+                  <button
+                    className="btn-secondary"
+                    onClick={() => addEvidence.mutate({ disputeId: d.id, url: fileInputs[d.id] || '' })}
+                    disabled={addEvidence.isPending}
+                  >
+                    {addEvidence.isPending ? 'Adding...' : 'Add Evidence'}
+                  </button>
+                </div>
+                <div className="text-sm mt-2 space-y-1">
+                  {d.evidence?.map((ev) => (
+                    <div key={ev.id} className="text-slate-500 dark:text-slate-400">
+                      • {ev.type}: {ev.fileUrl}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

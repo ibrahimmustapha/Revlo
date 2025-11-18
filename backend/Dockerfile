@@ -25,7 +25,7 @@ ENV NODE_ENV=production
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY prisma ./prisma
-COPY .env .env
+# .env is not copied; provide environment via platform settings
 
 # Expose port
 EXPOSE 4000

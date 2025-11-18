@@ -3,6 +3,7 @@ import { api, API_BASE } from '../api/client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import { Spinner } from '../components/Spinner';
 
 interface Trade {
   id: string;
@@ -22,7 +23,7 @@ interface Message {
 export default function MessagesPage() {
   const qc = useQueryClient();
   const { token } = useAuth();
-  const { data: trades } = useQuery<Trade[]>({ queryKey: ['trades'], queryFn: async () => (await api.get('/trades/me')).data });
+  const { data: trades, isLoading: tradesLoading } = useQuery<Trade[]>({ queryKey: ['trades'], queryFn: async () => (await api.get('/trades/me')).data });
   const [selectedTrade, setSelectedTrade] = useState<string>('');
   const [content, setContent] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -84,14 +85,18 @@ export default function MessagesPage() {
 
       <div className="card p-4">
         <h3 className="font-semibold mb-2">Select Trade</h3>
-        <select className="input" value={selectedTrade} onChange={(e) => setSelectedTrade(e.target.value)}>
-          <option value="">Choose a trade</option>
-          {trades?.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.id} — {t.fromCurrency} → {t.toCurrency}
-            </option>
-          ))}
-        </select>
+        {tradesLoading ? (
+          <Spinner label="Loading trades..." />
+        ) : (
+          <select className="input" value={selectedTrade} onChange={(e) => setSelectedTrade(e.target.value)}>
+            <option value="">Choose a trade</option>
+            {trades?.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.id} — {t.fromCurrency} → {t.toCurrency}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {selectedTrade && (

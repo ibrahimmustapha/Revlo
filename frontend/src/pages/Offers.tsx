@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { Offer } from '../types';
 import { FormEvent, useState } from 'react';
+import { Spinner } from '../components/Spinner';
 
 const Modal = ({ open, onClose, children, title }: { open: boolean; onClose: () => void; children: React.ReactNode; title: string }) => {
   if (!open) return null;
@@ -77,11 +78,12 @@ export default function Offers() {
           <h3 className="font-semibold">All Offers</h3>
         </div>
         {isLoading ? (
-          <div className="subtext">Loading...</div>
+          <Spinner label="Loading offers..." />
         ) : (
           <table className="table-base">
             <thead>
               <tr className="text-xs uppercase text-slate-500 dark:text-slate-400">
+                <th>ID</th>
                 <th>Side</th>
                 <th>Pair</th>
                 <th>Rate</th>
@@ -93,6 +95,7 @@ export default function Offers() {
             <tbody>
               {offers?.map((offer) => (
                 <tr key={offer.id}>
+                  <td className="text-xs text-slate-500 dark:text-slate-400">{offer.id}</td>
                   <td><span className="badge">{offer.side}</span></td>
                   <td className="font-semibold">
                     {offer.fromCurrency} → {offer.toCurrency}

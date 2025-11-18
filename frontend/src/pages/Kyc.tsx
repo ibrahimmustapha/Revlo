@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, API_BASE } from '../api/client';
 import { FormEvent, useState } from 'react';
+import { Spinner } from '../components/Spinner';
 
 interface Kyc {
   documentType: string;
@@ -18,7 +19,7 @@ const labelMap: Record<string, string> = {
 
 export default function KycPage() {
   const qc = useQueryClient();
-  const { data } = useQuery<Kyc | null>({ queryKey: ['kyc'], queryFn: async () => (await api.get('/kyc/me')).data });
+  const { data, isLoading } = useQuery<Kyc | null>({ queryKey: ['kyc'], queryFn: async () => (await api.get('/kyc/me')).data });
 
   const [form, setForm] = useState({
     documentType: 'NATIONAL_ID',
@@ -70,7 +71,9 @@ export default function KycPage() {
         </div>
       </div>
 
-      {data ? (
+      {isLoading ? (
+        <Spinner label="Loading KYC..." />
+      ) : data ? (
         <div className="card p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { FormEvent, useState } from 'react';
+import { Spinner } from '../components/Spinner';
 
 interface PaymentMethod {
   id: string;
@@ -12,7 +13,7 @@ interface PaymentMethod {
 
 export default function PaymentMethods() {
   const qc = useQueryClient();
-  const { data: items } = useQuery<PaymentMethod[]>({ queryKey: ['paymentMethods'], queryFn: async () => (await api.get('/payment-methods')).data });
+  const { data: items, isLoading } = useQuery<PaymentMethod[]>({ queryKey: ['paymentMethods'], queryFn: async () => (await api.get('/payment-methods')).data });
 
   const [type, setType] = useState('MOMO');
   const [label, setLabel] = useState('');
@@ -67,31 +68,35 @@ export default function PaymentMethods() {
 
       <div className="card p-4">
         <h3 className="font-semibold mb-3">My Payment Methods</h3>
-        <table className="table-base">
-          <thead>
-            <tr className="text-xs uppercase text-slate-500 dark:text-slate-400">
-              <th>Label</th>
-              <th>Type</th>
-              <th>Default</th>
-              <th>Details</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items?.map((pm) => (
-              <tr key={pm.id}>
-                <td className="font-semibold">{pm.label}</td>
-                <td>{pm.type}</td>
-                <td>{pm.isDefault ? 'Yes' : 'No'}</td>
-                <td className="text-xs text-slate-500 dark:text-slate-400"><code>{JSON.stringify(pm.details)}</code></td>
-                <td className="flex gap-2 py-2">
-                  <button className="btn-secondary" onClick={() => setDefaultPm(pm.id)}>Set Default</button>
-                  <button className="btn-secondary" onClick={() => remove(pm.id)}>Delete</button>
-                </td>
+        {isLoading ? (
+          <Spinner label="Loading payment methods..." />
+        ) : (
+          <table className="table-base">
+            <thead>
+              <tr className="text-xs uppercase text-slate-500 dark:text-slate-400">
+                <th>Label</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Details</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {items?.map((pm) => (
+                <tr key={pm.id}>
+                  <td className="font-semibold">{pm.label}</td>
+                  <td>{pm.type}</td>
+                  <td>{pm.isDefault ? 'Yes' : 'No'}</td>
+                  <td className="text-xs text-slate-500 dark:text-slate-400"><code>{JSON.stringify(pm.details)}</code></td>
+                  <td className="flex gap-2 py-2">
+                    <button className="btn-secondary" onClick={() => setDefaultPm(pm.id)}>Set Default</button>
+                    <button className="btn-secondary" onClick={() => remove(pm.id)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { Trade } from '../types';
 import { FormEvent, useState } from 'react';
+import { Spinner } from '../components/Spinner';
 
 export default function Trades() {
   const qc = useQueryClient();
-  const { data: trades } = useQuery<Trade[]>({
+  const { data: trades, isLoading } = useQuery<Trade[]>({
     queryKey: ['trades'],
     queryFn: async () => (await api.get('/trades/me')).data,
   });
@@ -56,37 +57,41 @@ export default function Trades() {
 
       <div className="card p-4">
         <h3 className="font-semibold mb-3">My Trades</h3>
-        <table className="table-base">
-          <thead>
-            <tr className="text-xs uppercase text-slate-500 dark:text-slate-400">
-              <th>ID</th>
-              <th>Pair</th>
-              <th>Amounts</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trades?.map((t) => (
-              <tr key={t.id}>
-                <td className="text-xs text-slate-500 dark:text-slate-400">{t.id}</td>
-                <td className="font-semibold">
-                  {t.fromCurrency} → {t.toCurrency}
-                </td>
-                <td>{t.fromAmount} / {t.toAmount}</td>
-                <td><span className="badge">{t.status}</span></td>
-                <td className="flex flex-wrap gap-2 py-2">
-                  <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'paid')}>Paid</button>
-                  <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'confirm')}>Confirm</button>
-                  <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'release')}>Release</button>
-                  <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'cancel')}>
-                    Cancel
-                  </button>
-                </td>
+        {isLoading ? (
+          <Spinner label="Loading trades..." />
+        ) : (
+          <table className="table-base">
+            <thead>
+              <tr className="text-xs uppercase text-slate-500 dark:text-slate-400">
+                <th>ID</th>
+                <th>Pair</th>
+                <th>Amounts</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {trades?.map((t) => (
+                <tr key={t.id}>
+                  <td className="text-xs text-slate-500 dark:text-slate-400">{t.id}</td>
+                  <td className="font-semibold">
+                    {t.fromCurrency} → {t.toCurrency}
+                  </td>
+                  <td>{t.fromAmount} / {t.toAmount}</td>
+                  <td><span className="badge">{t.status}</span></td>
+                  <td className="flex flex-wrap gap-2 py-2">
+                    <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'paid')}>Paid</button>
+                    <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'confirm')}>Confirm</button>
+                    <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'release')}>Release</button>
+                    <button className="btn-secondary" onClick={() => mutateStatus(t.id, 'cancel')}>
+                      Cancel
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

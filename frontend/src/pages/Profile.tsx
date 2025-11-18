@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { FormEvent, useState, useEffect } from 'react';
+import { Spinner } from '../components/Spinner';
 
 interface Profile {
   fullName?: string;
@@ -21,7 +22,7 @@ interface MeResponse {
 
 export default function ProfilePage() {
   const qc = useQueryClient();
-  const { data: user } = useQuery<MeResponse>({ queryKey: ['me'], queryFn: async () => (await api.get('/users/me')).data });
+  const { data: user, isLoading } = useQuery<MeResponse>({ queryKey: ['me'], queryFn: async () => (await api.get('/users/me')).data });
 
   const [form, setForm] = useState<Profile>({});
   useEffect(() => {
@@ -58,36 +59,40 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="card p-5 grid gap-6 md:grid-cols-[280px_1fr] items-center">
-        <div className="flex items-center gap-4">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" className="h-20 w-20 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
-          ) : (
-            <div className="h-20 w-20 rounded-full bg-brand-600 text-white font-bold grid place-items-center text-2xl">
-              {initials}
+      {isLoading ? (
+        <Spinner label="Loading profile..." />
+      ) : (
+        <div className="card p-5 grid gap-6 md:grid-cols-[280px_1fr] items-center">
+          <div className="flex items-center gap-4">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="avatar" className="h-20 w-20 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+            ) : (
+              <div className="h-20 w-20 rounded-full bg-brand-600 text-white font-bold grid place-items-center text-2xl">
+                {initials}
+              </div>
+            )}
+            <div>
+              <div className="text-xl font-bold">{user?.profile?.fullName || 'Set your name'}</div>
+              <div className="subtext">{user?.email || user?.phone}</div>
+              <span className="badge mt-2 inline-flex">{user?.role}</span>
             </div>
-          )}
-          <div>
-            <div className="text-xl font-bold">{user?.profile?.fullName || 'Set your name'}</div>
-            <div className="subtext">{user?.email || user?.phone}</div>
-            <span className="badge mt-2 inline-flex">{user?.role}</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3">
+              <div className="subtext">Rating</div>
+              <div className="text-2xl font-bold">{user?.rating ?? 0}</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3">
+              <div className="subtext">Completed trades</div>
+              <div className="text-2xl font-bold">{user?.completedTradeCount ?? 0}</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3">
+              <div className="subtext">Verified</div>
+              <div className="badge mt-1 inline-flex">{user?.isVerified ? 'Yes' : 'No'}</div>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3">
-            <div className="subtext">Rating</div>
-            <div className="text-2xl font-bold">{user?.rating ?? 0}</div>
-          </div>
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3">
-            <div className="subtext">Completed trades</div>
-            <div className="text-2xl font-bold">{user?.completedTradeCount ?? 0}</div>
-          </div>
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3">
-            <div className="subtext">Verified</div>
-            <div className="badge mt-1 inline-flex">{user?.isVerified ? 'Yes' : 'No'}</div>
-          </div>
-        </div>
-      </div>
+      )}
 
       <div className="card p-5 max-w-3xl">
         <h3 className="font-semibold mb-3">Edit Profile</h3>
