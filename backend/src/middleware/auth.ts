@@ -3,6 +3,8 @@ import { verifyToken, JwtPayload } from '../utils/jwt';
 
 export interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
+  file?: any;
+  files?: any;
 }
 
 export const requireAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

@@ -9,7 +9,7 @@ export const submitKyc = async (req: AuthenticatedRequest, res: Response) => {
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const { documentType, documentNumber } = req.body;
-    const files = req.files as Record<string, Express.Multer.File[]>;
+    const files = req.files as any;
     const toPublic = (file?: Express.Multer.File) =>
       file ? `/uploads/${path.basename(file.path)}` : undefined;
     const documentFrontPath = toPublic(files?.documentFront?.[0]);

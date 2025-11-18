@@ -6,7 +6,8 @@ import { initSocket } from './socket';
 const server = http.createServer(app);
 initSocket(server);
 
-server.listen(env.port, () => {
+const host = '::'; // listen on IPv6 (and IPv4-mapped) for Railway private network
+server.listen(env.port, host, () => {
   // eslint-disable-next-line no-console
-  console.log(`Server running on port ${env.port}`);
+  console.log(`Server running on http://${host}:${env.port}`);
 });
